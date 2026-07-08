@@ -13,7 +13,7 @@ else
 endif
 
 BUILD_DIR := $(AXI4)/build
-LOG_DIR := $(AXI4)/logs
+LOG_DIR := $(AXI4)/log
 COVERAGE_DIR := $(AXI4)/coverage
 
 XVLOG ?= xvlog
@@ -32,11 +32,12 @@ $(BUILD_DIR) $(LOG_DIR) $(COVERAGE_DIR):
 FILELIST: $(BUILD_DIR)
 	@echo -e "\033[1;33m#\033[0m Generating Filelist"
 	@echo "-i $(AXI4)/include" > $(BUILD_DIR)/flist.f
+	@echo "$(AXI4)/package/axi4_pkg.sv" >> $(BUILD_DIR)/flist.f
 	@find $(AXI4)/source -maxdepth 1 -name "*.sv" >> $(BUILD_DIR)/flist.f
 	@find $(AXI4)/testbench -maxdepth 1 -name "*.sv" >> $(BUILD_DIR)/flist.f
 
 .PHONY: all
-all: $(AXI4)/axi4.f $(AXI4)/test.f $(BUILD_DIR) $(LOG_DIR) FILELIST
+all: $(BUILD_DIR) $(LOG_DIR) FILELIST
 	@echo -e "\033[1;33m#\033[0m Compiling AXI4 testbench"
 	@cd $(BUILD_DIR) && $(XVLOG) -sv -f $(BUILD_DIR)/flist.f -log $(LOG_DIR)/xvlog_$(shell date +%Y%m%d_%H%M%S).log $(O_EW)
 	@echo -e "\033[1;33m#\033[0m Elaborating AXI4 testbench"
