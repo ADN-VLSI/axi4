@@ -4,8 +4,16 @@ export AXI4=$(CURDIR)
 
 TOP := hello
 
-BUILD_DIR    := $(AXI4)/build
-LOG_DIR      := $(AXI4)/logs
+GUI := 0
+
+ifeq ($(GUI), 0)
+	XSIM_ARGS += -runall
+else
+	XSIM_ARGS += -gui
+endif
+
+BUILD_DIR := $(AXI4)/build
+LOG_DIR := $(AXI4)/logs
 COVERAGE_DIR := $(AXI4)/coverage
 
 XVLOG ?= xvlog
@@ -20,14 +28,21 @@ $(BUILD_DIR) $(LOG_DIR) $(COVERAGE_DIR):
 	@mkdir -p $@
 	@echo "*" > $@/.gitignore
 
+.PHONY: FILELIST
+FILELIST: $(BUILD_DIR)
+	@echo -e "\033[1;33m#\033[0m Generating Filelist"
+	@echo "-i $(AXI4)/include" > $(BUILD_DIR)/flist.f
+	@find $(AXI4)/source -maxdepth 1 -name "*.sv" >> $(BUILD_DIR)/flist.f
+	@find $(AXI4)/testbench -maxdepth 1 -name "*.sv" >> $(BUILD_DIR)/flist.f
+
 .PHONY: all
-all: $(AXI4)/axi4.f $(AXI4)/test.f $(BUILD_DIR) $(LOG_DIR)
+all: $(AXI4)/axi4.f $(AXI4)/test.f $(BUILD_DIR) $(LOG_DIR) FILELIST
 	@echo -e "\033[1;33m#\033[0m Compiling AXI4 testbench"
-	@cd $(BUILD_DIR) && $(XVLOG) -sv -f $(AXI4)/axi4.f -f $(AXI4)/test.f -log $(LOG_DIR)/xvlog_$(shell date +%Y%m%d_%H%M%S).log $(O_EW)
+	@cd $(BUILD_DIR) && $(XVLOG) -sv -f $(BUILD_DIR)/flist.f -log $(LOG_DIR)/xvlog_$(shell date +%Y%m%d_%H%M%S).log $(O_EW)
 	@echo -e "\033[1;33m#\033[0m Elaborating AXI4 testbench"
 	@cd $(BUILD_DIR) && $(XELAB) $(TOP) -s snap_$(TOP) -debug all -log $(LOG_DIR)/xelab_$(TOP)_$(shell date +%Y%m%d_%H%M%S).log $(O_EW)
 	@echo -e "\033[1;33m#\033[0m Simulating AXI4 testbench"
-	@cd $(BUILD_DIR) && $(XSIM) snap_$(TOP) -runall -log $(LOG_DIR)/xsim_$(TOP)_$(shell date +%Y%m%d_%H%M%S).log $(H_EW)
+	@cd $(BUILD_DIR) && $(XSIM) snap_$(TOP) $(XSIM_ARGS) -log $(LOG_DIR)/xsim_$(TOP)_$(shell date +%Y%m%d_%H%M%S).log $(H_EW)
 
 .PHONY: clean
 clean:
