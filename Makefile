@@ -1,3 +1,5 @@
+export SHELL=/bin/bash
+
 export AXI4=$(CURDIR)
 
 TOP := hello
