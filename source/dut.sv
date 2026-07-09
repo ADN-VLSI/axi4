@@ -1,7 +1,7 @@
 module dut;
 
   initial begin
-    $display("DUT ASI");
+    $display("DUT ASA");
   end
 
 endmodule
