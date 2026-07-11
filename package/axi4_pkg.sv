@@ -97,7 +97,7 @@ package axi4_pkg;
       exc_tx_write = 0;
       if (exclusive_access_records.size()) begin
         idx = $urandom_range(0, exclusive_access_records.size() - 1);
-        exc_tx_write = $urandom_range(0, 1);
+       // exc_tx_write = $urandom_range(0, 1);
         exc_tx_id = exclusive_access_records[idx].tx_id;
         exc_tx_addr = exclusive_access_records[idx].tx_addr;
         exc_tx_len = exclusive_access_records[idx].tx_len;
@@ -206,6 +206,8 @@ package axi4_pkg;
       $sformat(txt, "%s\n QOS    : %0d", txt, tx_qos);
       $sformat(txt, "%s\n REGION : %0d", txt, tx_region);
       $sformat(txt, "%s\n REQUSR : 0x%0x", txt, tx_req_user);
+      $display("\n %d size of queue", exclusive_access_records.size());
+
       return txt;
     endfunction
 
